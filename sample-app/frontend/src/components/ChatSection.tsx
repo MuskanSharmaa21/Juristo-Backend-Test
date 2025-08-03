@@ -12,7 +12,7 @@
       console.log('Sending message:', message);
     
       try {
-        const response = await fetch('http://localhost:3000/chat', {
+        const response = await fetch('https://juristo-test.vercel.app/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json', // Set Content-Type to JSON

@@ -14,7 +14,7 @@ export function DocumentDrafting() {
     if (!prompt.trim()) return;
 
     try {
-      const res = await fetch('http://localhost:3000/drafting/questions', {
+      const res = await fetch('https://juristo-test.vercel.app/drafting/questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
@@ -32,7 +32,7 @@ export function DocumentDrafting() {
     if (Object.keys(answers).length === 0) return;
 
     try {
-      const res = await fetch('http://localhost:3000/drafting/document', {
+      const res = await fetch('https://juristo-test.vercel.app/drafting/document', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, answers }),

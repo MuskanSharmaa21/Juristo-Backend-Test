@@ -18,12 +18,13 @@ const app = express();
 app.use((req, res, next) => {
   const allowedOrigins = [
     "https://juristo-sigma.vercel.app",
-    "http://localhost:3000",
+    "https://juristo-test.vercel.app",
     "http://localhost:5911",
     "http://localhost:8541",
     "https://juristo-prod.vercel.app",
     "https://juristo.onrender.com",
-    "https://juristobot.vercel.app"
+    "https://juristobot.vercel.app",
+    "https://juristo-test.vercel.app"
   ];
   const origin = req.headers.origin;
 

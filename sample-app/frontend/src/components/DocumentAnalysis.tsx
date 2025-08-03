@@ -16,7 +16,7 @@ export function DocumentAnalysis() {
       formData.append('file', selectedFile);
 
       try {
-        const res = await fetch('http://localhost:3000/analyze', {
+        const res = await fetch('https://juristo-test.vercel.app/analyze', {
           method: 'POST',
           body: formData,
         });
@@ -34,7 +34,7 @@ export function DocumentAnalysis() {
     if (!query.trim() || !documentId) return; // Ensure documentId is present
   
     try {
-      const res = await fetch('http://localhost:3000/query', {
+      const res = await fetch('https://juristo-test.vercel.app/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: query, documentId }), // Change "query" to "question"
