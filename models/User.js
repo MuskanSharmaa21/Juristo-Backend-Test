@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     password: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    mobile: { type: String },
     // Optional userId generated if not provided.
     userId: { type: String, unique: true, sparse: true },
     // Plan: basic (free), super, or advance.
@@ -53,6 +54,7 @@ const userSchema = new mongoose.Schema(
       count: { type: Number, default: 0 },
       lastReset: { type: Date, default: Date.now }
     },
+    newsLetterSubscribed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

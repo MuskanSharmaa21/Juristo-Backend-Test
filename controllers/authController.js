@@ -36,6 +36,9 @@ export const login = async (req, res) => {
         country: user.country,
         language: user.language,
         createdAt: user.createdAt,
+        newsLetterSubscribed: user.newsLetterSubscribed,
+        plan: user.plan,
+        mobile: user.mobile,
         token,
       });
 
@@ -55,7 +58,7 @@ export const login = async (req, res) => {
 };
 
 export const signup = async (req, res) => {
-  const { firstName, lastName, email, password, fcmToken } = req.body;
+  const { firstName, lastName, email, password, fcmToken, mobileNumber } = req.body;
   const name = `${firstName} ${lastName}`;
 
   try {
@@ -70,6 +73,7 @@ export const signup = async (req, res) => {
       email,
       password,
       name,
+      mobile: mobileNumber,
       // Use defaults for country and language if not provided
       country: req.body.country || { label: "India", value: "IN" },
       language: req.body.language || { label: "English", value: "EN" },
@@ -85,9 +89,13 @@ export const signup = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      mobile: user.mobile,
       country: user.country,
       language: user.language,
       createdAt: user.createdAt,
+      newsLetterSubscribed: user.newsLetterSubscribed,
+      plan: user.plan,
+      mobile: user.mobile,
       token,
     });
 

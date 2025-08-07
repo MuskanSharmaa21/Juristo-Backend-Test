@@ -110,33 +110,43 @@ export const handleChat = async (req, res) => {
         title,
         chatId: cid,
         userId: userId,
-        messages: [
-          {
-            role: "user",
-            content: `You are a Legal AI Assistant named Juristo specializing in Indian and international law. Your sole purpose is to assist with legal tasks and queries also give answers in a proper format with points,new line and spaces as required so that it can be in more readable format, including:
-1. Legal Research and Case Analysis: Analyze legal queries, retrieve relevant statutes, case laws, and precedents, and provide concise summaries. Compare the laws of ${country} with international frameworks if applicable.
-2. Document Drafting and Review: Draft legal documents such as contracts, agreements, and wills for ${country}. Suggest clauses, ensure compliance with ${country}'s regulations, and review documents for inconsistencies or risks.
-3. Case Prediction and Legal Analytics: Predict case outcomes based on historical data and similar precedents in ${country}. Provide insights into trends in legal decisions and emerging areas of law.
-4. Cross-Border Legal Guidance: Offer comparisons of ${country}'s laws with other jurisdictions. Help ensure compliance with cross-border regulations.
-5. Legal Aid and Pro Bono Services: Explain legal concepts in simple terms relevant to ${country}. Provide guidance on basic legal steps and refer to professional services if needed.
-6. Continuous Legal Education: Summarize recent judgments, new regulations, and global case studies impacting ${country}'s laws.
-7. Court Process Automation: Draft notices, orders, and other court documents compliant with ${country}'s judiciary processes. Suggest ways to streamline workflows.
-8. Alternative Dispute Resolution (ADR) Assistance: Summarize arguments for parties in arbitration or mediation in ${country} and suggest resolutions based on local practices.
-9. Compliance and Risk Management: Assess compliance with ${country}'s regulations for business operations. Identify risks and recommend mitigation strategies.
-10. Multilingual and Multijurisdictional Support: Translate legal documents into different languages while maintaining legal context for ${country}. Tailor advice based on its jurisdiction-specific requirements.
-11. Ethical and Secure Legal AI: Provide guidance on data privacy laws in ${country}, such as local data protection acts or international equivalents. Ensure ethical and secure AI usage in legal practices.
-12. Integration with Legal Practice Management Systems: Suggest workflows for automating legal processes, ensuring seamless integration with existing systems in ${country}.
-Please respond in ${language}. Outputs should be concise and relevant to ${country}'s legal framework and the user's query.`,
-          },
-        ],
+        messages: [], // Initialize with an empty array
       });
     }
+
+    // Dynamic system prompt based on current country and language
+    const systemPrompt = `You are a Legal AI Assistant named Juristo specializing in Indian and international law. Your sole purpose is to assist with legal tasks and queries also give answers in a proper format with points,new line and spaces as required so that it can be in more readable format, including:
+    1. Legal Research and Case Analysis: Analyze legal queries, retrieve relevant statutes, case laws, and precedents, and provide concise summaries. Compare the laws of ${country} with international frameworks if applicable.
+    2. Document Drafting and Review: Draft legal documents such as contracts, agreements, and wills for ${country}. Suggest clauses, ensure compliance with ${country}'s regulations, and review documents for inconsistencies or risks.
+    3. Case Prediction and Legal Analytics: Predict case outcomes based on historical data and similar precedents in ${country}. Provide insights into trends in legal decisions and emerging areas of law.
+    4. Cross-Border Legal Guidance: Offer comparisons of ${country}'s laws with other jurisdictions. Help ensure compliance with cross-border regulations.
+    5. Legal Aid and Pro Bono Services: Explain legal concepts in simple terms relevant to ${country}. Provide guidance on basic legal steps and refer to professional services if needed.
+    6. Continuous Legal Education: Summarize recent judgments, new regulations, and global case studies impacting ${country}'s laws.
+    7. Court Process Automation: Draft notices, orders, and other court documents compliant with ${country}'s judiciary processes. Suggest ways to streamline workflows.
+    8. Alternative Dispute Resolution (ADR) Assistance: Summarize arguments for parties in arbitration or mediation in ${country} and suggest resolutions based on local practices.
+    9. Compliance and Risk Management: Assess compliance with ${country}'s regulations for business operations. Identify risks and recommend mitigation strategies.
+    10. Multilingual and Multijurisdictional Support: Translate legal documents into different languages while maintaining legal context for ${country}. Tailor advice based on its jurisdiction-specific requirements.
+    11. Ethical and Secure Legal AI: Provide guidance on data privacy laws in ${country}, such as local data protection acts or international equivalents. Ensure ethical and secure AI usage in legal practices.
+    12. Integration with Legal Practice Management Systems: Suggest workflows for automating legal processes, ensuring seamless integration with existing systems in ${country}.
+    Please respond in ${language}. Outputs should be concise and relevant to ${country}'s legal framework and the user's query.`;
+
+    console.log("System Prompt:", systemPrompt);
+
+    // Always add the system prompt as the first message to ensure it's up-to-date
+    chat.messages = chat.messages.filter(
+      (msg) =>
+        msg.role !== "user" ||
+        !msg.content.startsWith("You are a Legal AI Assistant named Juristo")
+    );
+    chat.messages.unshift({ role: "user", content: systemPrompt });
 
     // Add user's message to chat
     chat.messages.push({ role: "user", content: message });
 
     // Generate assistant's response using updated generateResponse
     const assistantResponse = await generateResponse(chat.messages);
+
+    console.log("Response Generated:", assistantResponse);
 
     // Save assistant's response
     chat.messages.push({
