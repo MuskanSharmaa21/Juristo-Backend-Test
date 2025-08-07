@@ -24,5 +24,6 @@ router.get("/get/:email", findUserByEmail);
 router.put("/update/:userId", updateUser);
 router.put("/forget/:userId", updatePassword);
 router.delete("/:userId", deleteUser);
+router.put("/subscribe-newsletter", subscribeNewsletter)
 
 export default router;
