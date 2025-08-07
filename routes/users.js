@@ -11,6 +11,7 @@ import {
   findUserByEmail,
   generateApiKey,
   updateDraftCount,
+  subscribeNewsletter
 } from "../controllers/userController.js";
 
 const router = express.Router();
