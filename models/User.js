@@ -35,6 +35,8 @@ const userSchema = new mongoose.Schema(
       value: { type: String, default: "EN" },
     },
     draftCount: { type: Number, default: 0 },
+    chatCount: { type: Number, default: 0 },
+    imageChatCount: { type: Number, default: 0 },
     // Fields for secure password reset:
     resetPasswordToken: String,
     resetPasswordExpires: Date,
