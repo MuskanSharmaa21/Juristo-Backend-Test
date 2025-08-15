@@ -1,8 +1,9 @@
-import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
+import { Document as DocxDocument, Packer, Paragraph, TextRun, AlignmentType } from "docx";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { Legaldocs } from "../models/Legaldocs.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import mammoth from "mammoth";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import User from "../models/User.js";
 
 export const generateQuestions = async (req, res) => {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -15,11 +16,12 @@ export const generateQuestions = async (req, res) => {
         .status(400)
         .json({ error: "User input and country are required." });
     }
-
+    console.log('1');
     // Call Gemini API for question generation
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-pro-exp-02-05",
+      model: "gemini-2.5-flash-lite",
     });
+    console.log('2');
     const result = await model.generateContent({
       contents: [
         {
@@ -40,7 +42,7 @@ export const generateQuestions = async (req, res) => {
         },
       ],
     });
-
+    console.log('3');
     const response = await result.response;
     const questions = response.text().trim().split("\n").filter(Boolean);
     console.log(questions);
@@ -52,16 +54,24 @@ export const generateQuestions = async (req, res) => {
 };
 
 export const createDocument = async (req, res) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://juristo-sigma.vercel.app"
-  );
+  // Updated CORS configuration to allow multiple origins
+  const allowedOrigins = [
+    "https://juristo-sigma.vercel.app",
+    "https://www.chat.juristo.in"
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true");
+  
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   try {
     // Extract required fields from the request body
@@ -81,7 +91,7 @@ export const createDocument = async (req, res) => {
     }
     // Call Gemini API to generate the legal document
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-pro-exp-02-05",
+      model: "gemini-2.5-flash-lite",
     });
     const result = await model.generateContent({
       contents: [
@@ -106,7 +116,6 @@ export const createDocument = async (req, res) => {
       ],
     });
 
-
     const response = await result.response;
     const legalText = response.text().trim();
 
@@ -120,6 +129,21 @@ export const createDocument = async (req, res) => {
     // Save the generated document to the database
     const document = new Legaldocs({ userId, userInput, answers, country });
     await document.save();
+
+    // INCREMENT DRAFT COUNT for the user
+    if (userId) {
+      try {
+        await User.findByIdAndUpdate(
+          userId,
+          { $inc: { draftCount: 1 } },
+          { upsert: false }
+        );
+        console.log(`Draft count incremented for user: ${userId}`);
+      } catch (countError) {
+        console.error("Error updating draft count:", countError);
+        // Don't fail the main request if count update fails
+      }
+    }
 
     // Return generated document preview and file buffers
     res.status(200).json({
@@ -178,7 +202,7 @@ export const generatePDF = async (text) => {
 
 // Helper function to generate DOCX
 export const generateDocx = async (text) => {
-  const doc = new Document({
+  const doc = new DocxDocument({
     sections: [
       {
         children: createFormattedParagraphs(text),

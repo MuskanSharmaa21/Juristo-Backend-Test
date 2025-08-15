@@ -3,6 +3,7 @@ import Tesseract from "tesseract.js";
 import { createRequire } from "module";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import mongoose from "mongoose";
+import User from "../models/User.js";
 
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
@@ -13,10 +14,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 /**
  * Generate a title for the chat using Gemini Pro
  */
-const generateTitle = async (message) => {
+const generateImageChatTitle = async (message) => {
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-pro-exp-02-05",
+      model: "gemini-2.5-flash-lite",
     });
     const result = await model.generateContent({
       contents: [
@@ -68,7 +69,7 @@ export const handleImageChat = async (req, res) => {
     }
 
     const newChatId = new mongoose.Types.ObjectId().toString();
-    const title = await generateTitle(extractedText);
+    const title = await generateImageChatTitle(extractedText);
 
     const chat = new Document({
       title: title,
@@ -79,6 +80,21 @@ export const handleImageChat = async (req, res) => {
     });
 
     await chat.save();
+
+    // INCREMENT IMAGE CHAT COUNT for the user
+    if (userId) {
+      try {
+        await User.findByIdAndUpdate(
+          userId,
+          { $inc: { imageChatCount: 1 } },
+          { upsert: false }
+        );
+        console.log(`Image chat count incremented for user: ${userId}`);
+      } catch (countError) {
+        console.error("Error updating image chat count:", countError);
+        // Don't fail the main request if count update fails
+      }
+    }
 
     res.status(200).json({
       message: "Analyzed successfully.",
@@ -134,7 +150,7 @@ export const handleUserQuestion = async (req, res) => {
     ];
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-pro-exp-02-05",
+      model: "gemini-2.5-flash-lite",
     });
     const result = await model.generateContent({
       contents: messages,
@@ -147,6 +163,21 @@ export const handleUserQuestion = async (req, res) => {
     chat.messages.push({ role: "assistant", content: answer });
 
     await chat.save();
+
+    // INCREMENT IMAGE CHAT COUNT for follow-up questions as well
+    if (userId) {
+      try {
+        await User.findByIdAndUpdate(
+          userId,
+          { $inc: { imageChatCount: 1 } },
+          { upsert: false }
+        );
+        console.log(`Image chat count incremented for follow-up question for user: ${userId}`);
+      } catch (countError) {
+        console.error("Error updating image chat count:", countError);
+        // Don't fail the main request if count update fails
+      }
+    }
 
     res.status(200).json({ answer, chat });
   } catch (error) {

@@ -1,5 +1,6 @@
 import axios from "axios";
 import Chat from "../models/Chat.js";
+import User from "../models/User.js"; // Import User model
 import { marked } from "marked";
 import { gfmHeadingId } from "marked-gfm-heading-id";
 import { markedHighlight } from "marked-highlight";
@@ -155,6 +156,21 @@ export const handleChat = async (req, res) => {
     });
 
     await chat.save();
+
+    // INCREMENT CHAT COUNT for the user
+    if (userId) {
+      try {
+        await User.findByIdAndUpdate(
+          userId,
+          { $inc: { chatCount: 1 } },
+          { upsert: false }
+        );
+        console.log(`Chat count incremented for user: ${userId}`);
+      } catch (countError) {
+        console.error("Error updating chat count:", countError);
+        // Don't fail the main request if count update fails
+      }
+    }
 
     res.send({ response: assistantResponse, chat });
   } catch (error) {

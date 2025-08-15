@@ -6,11 +6,12 @@ import {
 } from "../controllers/legaldocsController.js";
 const router = express.Router();
 import cors from "cors";
+import { requestLimitMiddleware } from "../middlewares/requestLimiter.js";
 
 router.use(cors());
 
-router.post("/questions", generateQuestions);
-router.post("/generate", cors(), createDocument);
+router.post("/questions", requestLimitMiddleware, generateQuestions);
+router.post("/generate", cors(), requestLimitMiddleware, createDocument);
 router.get("/:userId", getAllDocumentsByUserId);
 
 export default router;
